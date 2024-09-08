@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  ed-machina-db:
+    image: postgres:13
+    container_name: ed-machina-db
+    environment:
+      - POSTGRES_DB=ed-machina
+      - POSTGRES_USER=ed-machina
+      - POSTGRES_PASSWORD=ed-machina
+    volumes:
+      - ed-machina-db-volume:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - ed-machina-network
+
+  ed-machina-srv:
+    build: .
+    labels:
+      - edmachina
+    environment:
+      DATABASE_URL: postgresql+psycopg2://ed-machina:ed-machina@ed-machina-db:5432/ed-machina
+    depends_on:
+      - ed-machina-db
+    ports:
+      - "8000:8000"
+    networks:
+      - ed-machina-network
+    entrypoint: >
+      sh -c "wait-for-it ed-machina-db:5432 --strict --timeout=60 -- sh -c 'uvicorn main:app --reload --host 0.0.0.0 --port 8000'"
+
+volumes:
+  ed-machina-db-volume:
+    name: ed-machina-db-volume
+
+networks:
+  ed-machina-network:
+    driver: bridge
