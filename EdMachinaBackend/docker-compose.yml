@@ -5,20 +5,21 @@ services:
     image: postgres:13
     container_name: ed-machina-db
     environment:
-      - POSTGRES_DB=ed-machina
-      - POSTGRES_USER=ed-machina
-      - POSTGRES_PASSWORD=ed-machina
+      POSTGRES_DB: ed-machina
+      POSTGRES_USER: ed-machina
+      POSTGRES_PASSWORD: ed-machina
     volumes:
       - ed-machina-db-volume:/var/lib/postgresql/data
     ports:
       - 5432:5432
     networks:
-      - ed-machina-network
+      - edmachina
 
   ed-machina-srv:
     build: .
     labels:
       - edmachina
+    container_name: ed-machina-srv
     environment:
       DATABASE_URL: postgresql+psycopg2://ed-machina:ed-machina@ed-machina-db:5432/ed-machina
     depends_on:
@@ -26,7 +27,7 @@ services:
     ports:
       - "8000:8000"
     networks:
-      - ed-machina-network
+      - edmachina
     entrypoint: >
       sh -c "wait-for-it ed-machina-db:5432 --strict --timeout=60 -- sh -c 'uvicorn main:app --reload --host 0.0.0.0 --port 8000'"
 
@@ -35,5 +36,5 @@ volumes:
     name: ed-machina-db-volume
 
 networks:
-  ed-machina-network:
+  edmachina:
     driver: bridge

@@ -1,14 +1,14 @@
 FROM python:3.10.14-slim
 
-RUN apt-get update && apt-get install -y wait-for-it
+RUN apt-get update && apt-get install -y wait-for-it && pip install --upgrade pip
 
-WORKDIR /usr/scr/app
+WORKDIR /app
 
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /usr/scr/app
+COPY . .
 
 EXPOSE 8000
 
